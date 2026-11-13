@@ -16,39 +16,41 @@ events = [
     Event(1, "Tech Meetup"),
     Event(2, "Python Workshop")
 ]
+@app.route("/events/<int:event_id>",methods=['GET'])
+def get_event(event_id):
+    event = next((event for event in events if event.id == event_id),None)
+    if not event:
+        return jsonify("Event not found",404)
+    return jsonify(event.to_dict())
 
-# TODO: Task 1 - Define the Problem
-# Create a new event from JSON input
 @app.route("/events", methods=["POST"])
 def create_event():
-    # TODO: Task 2 - Design and Develop the Code
+    data = request.get_json()
+    new_id = max([event.id for event in events]) + 1 if events else ("events not found")
+    new_event = Event(id=new_id,title=data['title'])
+    events.append(new_event)
+    return jsonify(new_event.to_dict()),201
 
-    # TODO: Task 3 - Implement the Loop and Process Each Element
-
-    # TODO: Task 4 - Return and Handle Results
-    pass
-
-# TODO: Task 1 - Define the Problem
-# Update the title of an existing event
 @app.route("/events/<int:event_id>", methods=["PATCH"])
 def update_event(event_id):
-    # TODO: Task 2 - Design and Develop the Code
+    data = request.get_json()
+    event = next((e for e in events if e.id == event_id),None)
+    if not event:
+        return jsonify('event not found'),404
+    if "title" in data:
+        event.title = data['title']
+    else:
+        ("Title not found")
+    return jsonify(event.to_dict()) 
 
-    # TODO: Task 3 - Implement the Loop and Process Each Element
-
-    # TODO: Task 4 - Return and Handle Results
-    pass
-
-# TODO: Task 1 - Define the Problem
-# Remove an event from the list
 @app.route("/events/<int:event_id>", methods=["DELETE"])
 def delete_event(event_id):
-    # TODO: Task 2 - Design and Develop the Code
-
-    # TODO: Task 3 - Implement the Loop and Process Each Element
-
-    # TODO: Task 4 - Return and Handle Results
-    pass
+    global events
+    event = next((e for e in events if e.id == event_id),None)
+    if not event:
+        return jsonify('Event not found'),404
+    events = [e for e in events if e.id != event_id]
+    return jsonify(event.to_dict()),204
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(port=5555,debug=True)
